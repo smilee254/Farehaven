@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wow'Man Fare Haven Ltd. - Social Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Background Enchanted Rose Decoration -->
+    <div class="enchanted-rose-bg">
+        <div class="glowing-orb teal"></div>
+        <div class="glowing-orb amber"></div>
+        <svg class="rose-silhouette" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10 C30 20 20 40 30 60 C35 70 45 75 50 80 C55 75 65 70 70 60 C80 40 70 20 50 10 Z"
+                fill="rgba(224, 17, 95, 0.4)" />
+            <path d="M50 80 Q50 90 55 100" stroke="rgba(34, 139, 34, 0.6)" stroke-width="4" fill="none" />
+        </svg>
+        <div class="particles"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="glass-header">
+            <h1>The Wow'Man Fare Haven Ltd.</h1>
+            <p class="quote">"{{ quote }}"</p>
+        </div>
+    </header>
+
+    <div class="glow-and-grow">
+        <h2>GLOW AND GROW</h2>
+    </div>
+
+    <!-- Services / Activities Section -->
+    <section class="services-container">
+        <h2 class="section-title">Our Haven Services</h2>
+        <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+            <div class="glass-card service-card">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Motivational Workshops</h3>
+                <p>Actionable insights and mindset alignment to spark your inner professional power.</p>
+            </div>
+            <div class="glass-card service-card">
+                <i class="fas fa-users-cog"></i>
+                <h3>Team Building</h3>
+                <p>Engineered synergy sessions to strengthen bonds in Corporate and Chama environments.</p>
+            </div>
+            <div class="glass-card service-card">
+                <i class="fas fa-hiking"></i>
+                <h3>Hikes & Rock Climbing</h3>
+                <p>Physical rejuvenation in breathtaking Kenyan highlands.</p>
+            </div>
+            <div class="glass-card service-card">
+                <i class="fas fa-book-reader"></i>
+                <h3>Book Clubs & Prayer</h3>
+                <p>Intellectual and spiritual nourishmenmt in shared sanctuary.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="expertise-container glass-card">
+        <h2>Finding Your Spark Again</h2>
+        <p>Our retreats and workshops are designed with one core purpose: elevating your <strong>Mental
+                Wellness</strong> and authentic <strong>Networking</strong>. Guided by our network of qualified experts
+            and trained facilitators, we create sanctuaries where every woman can reconnect with her youth, passion, and
+            inner strength.</p>
+    </section>
+
+    <!-- Dynamic Event Gallery Section -->
+    <main class="gallery-container">
+        <h2 class="section-title">Recent & Upcoming Retreats</h2>
+        <div id="events-grid" class="events-grid">
+            <!-- Events injected here dynamically -->
+        </div>
+    </main>
+
+    <!-- Registration Section -->
+    <section id="register" class="register-container">
+        <div class="glass-card register-panel">
+            <h2 class="section-title" style="margin-bottom: 1rem;">Join the Community</h2>
+            <div
+                style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--amber-gold); border-radius: 12px; padding: 1rem; margin-bottom: 2rem; border-color: var(--amber-gold); text-align: center;">
+                <p style="color: var(--amber-gold); font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;"><i
+                        class="fas fa-money-bill-wave"></i> Payment Instructions</p>
+                <div style="font-size: 1rem; letter-spacing: 0.5px;">
+                    Paybill: <strong style="color: #fff;">644700</strong> | Acc: <strong
+                        style="color: #fff;">0521265</strong>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('register') }}" method="POST" class="admin-form">
+                <div class="form-group flex-group">
+                    <div style="flex: 1;">
+                        <label>Full Name</label>
+                        <input type="text" name="name" required placeholder="Your real name">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" required placeholder="07XXXXXXXX">
+                    </div>
+                </div>
+
+                <div class="form-group flex-group">
+                    <div style="flex: 1;">
+                        <label>Organization Type</label>
+                        <div class="custom-select">
+                            <select name="category" required>
+                                <option value="" disabled selected>Select type...</option>
+                                <option value="Individual">Individual</option>
+                                <option value="Chama">Chama Group</option>
+                                <option value="Corporate">Corporate Retreat</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Activity</label>
+                        <div class="custom-select">
+                            <select name="activity" required>
+                                <option value="" disabled selected>Select activity...</option>
+                                <option value="Hiking">Hiking</option>
+                                <option value="Rock Climbing">Rock Climbing</option>
+                                <option value="Prayer Session">Prayer Session</option>
+                                <option value="Book Club">Book Club</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Enter M-Pesa Transaction Code/Message</label>
+                    <input type="text" name="mpesa" placeholder="Paste your M-Pesa confirmation here">
+                </div>
+
+                <button type="submit" class="btn">Register Interest</button>
+            </form>
+            <div style="text-align: center; margin-top: 2rem; color: var(--amber-gold);">
+                <div><i class="fas fa-envelope"></i> <a href="mailto:thewowmanfarehaven@gmail.com"
+                        style="color: inherit; text-decoration: none;">thewowmanfarehaven@gmail.com</a></div>
+                <div style="margin-top: 0.5rem;"><i class="fas fa-phone"></i> 07133552735</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Gold WhatsApp Button -->
+    <a href="https://wa.me/2547133552735?text=Hello%20Wow'Man%20Fare%20Haven!" class="whatsapp-float" target="_blank"
+        rel="noopener noreferrer" title="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/events')
+                .then(response => response.json())
+                .then(events => {
+                    const grid = document.getElementById('events-grid');
+                    // Reverse to show newest first
+                    if (events.length === 0) {
+                        grid.innerHTML = '<p style="text-align:center;width:100%;grid-column:1/-1;color:var(--text-secondary);">More retreats coming soon...</p>';
+                        return;
+                    }
+                    events.reverse().forEach(event => {
+                        const card = document.createElement('div');
+                        card.className = 'glass-card event-card';
+
+                        // Only show badge if fee is present
+                        const badgeHTML = event.fee ? `<div class="event-badge">${event.fee}</div>` : '';
+
+                        card.innerHTML = `
+                            <div class="card-image" style="background-image: url('${event.image_url}')">
+                                ${badgeHTML}
+                            </div>
+                            <div class="card-content">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                    <h3>${event.title}</h3>
+                                </div>
+                                <div style="color: var(--amber-gold); font-size: 0.85rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+                                    <i class="fas fa-map-marker-alt"></i> ${event.location}
+                                </div>
+                                <p>${event.description}</p>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                })
+                .catch(err => console.error('Error fetching events:', err));
+        });
+    </script>
+
+    <footer class="main-footer">
+        <p>&copy; 2026 The Wow'Man Fare Haven Ltd. All rights reserved.</p>
+        <p><i class="fas fa-envelope"></i> <a
+                href="mailto:thewowmanfarehaven@gmail.com">thewowmanfarehaven@gmail.com</a></p>
+    </footer>
+</body>
+
+</html>
