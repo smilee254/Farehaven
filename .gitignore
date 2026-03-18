@@ -1,0 +1,17 @@
+# Environment Variables
+.env
+.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+
+# Vercel
+.vercel
+
+# System
+.DS_Store
+Thumbs.db
