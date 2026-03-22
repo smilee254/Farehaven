@@ -33,6 +33,14 @@
             "activity": "Hiking",
             "mpesa": "uuwuuwuwdb",
             "id": 1
+        },
+        {
+            "name": "Lewis mwangi",
+            "phone": "0759399204",
+            "category": "Individual",
+            "activity": "Rock Climbing",
+            "mpesa": "uuwuuwuwdb",
+            "id": 2
         }
     ]
 }
