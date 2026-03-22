@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Step 1: Your Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #122139;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .form-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #fc5;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #122139;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #f22;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-box">
+        <h2>Step 1: Your Details</h2>
+        <form method="POST">
+            <input type="text" name="name" placeholder="Full Name" value="{{ session.get('client_name', '') }}"
+                required>
+            <input type="email" name="email" placeholder="Email Address" value="{{ session.get('client_email', '') }}"
+                required>
+            <input type="tel" name="phone" placeholder="Phone Number" value="{{ session.get('client_phone', '') }}"
+                required>
+            <select name="category"
+                style="padding: 10px; margin: 10px 0; width: 100%; border: none; border-radius: 5px; box-sizing: border-box; background: white; color: #122139; font-weight: bold;"
+                required>
+                <option value="" disabled {{ 'selected' if not session.get('client_category') }}>Select Category
+                </option>
+                <option value="Person" {{ 'selected' if session.get('client_category')=='Person' }}>Individual (Person)
+                </option>
+                <option value="Team" {{ 'selected' if session.get('client_category')=='Team' }}>Team / Corporate
+                </option>
+                <option value="Chama" {{ 'selected' if session.get('client_category')=='Chama' }}>Chama Group</option>
+            </select>
+            <button type="submit">Continue</button>
+        </form>
+        <br>
+        <a href="{{ url_for('home') }}" style="color: #fc5;">Back to Home</a>
+    </div>
+</body>
+
+</html>

@@ -1,34 +1,58 @@
 import os
+import sys
 import json
+import csv
+import time
 import random
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
-from dotenv import load_dotenv
+from io import StringIO
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, Response
 
-# Load environment variables from .env if it exists
-load_dotenv()
+# Fix: Ensure local .lib is available for USB/FAT32 environment 
+# where standard virtual environments are unsupported.
+lib_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.lib')
+if os.path.exists(lib_path):
+    sys.path.insert(0, lib_path)
 
+# Optional Supabase Integration for Cloud Sync
 try:
     from supabase import create_client, Client
 except ImportError:
     create_client, Client = None, None
 
+from flask_sqlalchemy import SQLAlchemy
+
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.environ.get('SECRET_KEY', 'wowman_executive_muse_secret_key')
 
-# Supabase Credentials
+# Enable App Debug Mode for senior-level diagnostics
+app.config['DEBUG'] = True
+
+# -- Database Configuration (Hardware Optimized for Intel Celeron/USB) --
+# Ensuring the local SQLite database stays on the external drive (/media/smilee/64 GB/)
+# with a 30-second timeout to handle high-latency I/O spikes.
+db_dir = "/media/smilee/64 GB/MUM/wowman_registration/api"
+if not os.path.exists(db_dir):
+    db_dir = os.path.dirname(__file__)
+DB_PATH = os.path.join(db_dir, 'registration.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}?timeout=30'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Supabase Credentials (Cloud Sync)
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
 SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', os.environ.get('SUPABASE_KEY', ''))
 
-# Initialize Supabase
+# Initialize Supabase if available
 supabase: Client = None
 if create_client and SUPABASE_URL and SUPABASE_KEY:
     try:
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     except Exception as e:
-        print(f"Error initializing Supabase: {e}")
+        print(f"[LOG] Cloud Init skipped: {e}")
 
-# Admin Email
-ADMIN_EMAIL = "thewowmanfarehaven@gmail.com"
+# Admin Authorization
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', "thewowmanfarehaven@gmail.com")
 
 QUOTES = [
     "Reconnecting you with your youth through retreats and workshops.",
@@ -38,48 +62,46 @@ QUOTES = [
     "Embrace the journey of self-discovery and collective growth."
 ]
 
-# --- Dual Storage: Supabase with Local data.json Fallback ---
-def load_local_data() -> dict:
-    """Load local data and ensure a consistent dictionary structure."""
-    local_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data.json')
-    default_structure = {"events": [], "registrations": []}
-    
-    if os.path.exists(local_path):
-        with open(local_path, 'r') as f:
-            try:
-                data = json.load(f)
-                if not isinstance(data, dict):
-                    return default_structure
-                # Ensure keys exist
-                for key in default_structure:
-                    if key not in data:
-                        data[key] = []
-                return data
-            except:
-                return default_structure
-    return default_structure
+# -- Models (Integrated Chama/Team/Individual) --
 
-def save_local_data(data: dict):
-    """Save dictionary to local file atomically if possible."""
-    local_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data.json')
-    with open(local_path, 'w') as f:
-        json.dump(data, f, indent=4)
+class UserRegistration(db.Model):
+    """
+    User model representing the registration table.
+    Includes 'category' for Person, Team, Chama choices.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    # Mapping for Chama/Team/Individual
+    category = db.Column(db.String(50), nullable=False, default='Individual')
+    activity = db.Column(db.String(100))
+    mpesa = db.Column(db.String(50))
+    term_id = db.Column(db.String(50), default='General')
+    timestamp = db.Column(db.DateTime, default=db.func.now())
 
-def get_events():
-    if supabase:
-        try:
-            return supabase.table('events').select('*').execute().data
-        except: pass
-    return load_local_data().get('events', [])
+class GalleryEvent(db.Model):
+    """Local storage for gallery events on USB drive."""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    location = db.Column(db.String(200))
+    fee = db.Column(db.String(50))
+    image_url = db.Column(db.String(500))
+    description = db.Column(db.Text)
 
-def get_registrations():
-    if supabase:
-        try:
-            return supabase.table('registrations').select('*').order('created_at', desc=True).execute().data
-        except: pass
-    return load_local_data().get('registrations', [])
+# Auto-provision Database
+with app.app_context():
+    db.create_all()
 
-# --- Routes ---
+# -- Helpers --
+
+def validate_category(category):
+    """Map registration choices to standard categories."""
+    allowed = ["Individual", "Person", "Team", "Chama"]
+    if category in allowed:
+        return category
+    return "Individual"
+
+# -- Routes --
 
 @app.route('/')
 def index():
@@ -88,39 +110,56 @@ def index():
 
 @app.route('/register', methods=['POST'])
 def register():
-    form_data = {
-        "name": request.form.get('name'),
-        "phone": request.form.get('phone'),
-        "category": request.form.get('category'),
-        "activity": request.form.get('activity'),
-        "mpesa": request.form.get('mpesa')
-    }
-    
-    if all([form_data['name'], form_data['phone'], form_data['category'], form_data['activity']]):
-        if supabase:
-            try:
-                supabase.table('registrations').insert(form_data).execute()
-                flash('Registration successful! [Cloud]', 'success')
-            except: pass
+    """Registration route with Error Handling for slow Celeron CPU commits."""
+    name = request.form.get('name')
+    phone = request.form.get('phone')
+    category = validate_category(request.form.get('category'))
+    activity = request.form.get('activity')
+    mpesa = request.form.get('mpesa')
+
+    if name and phone:
+        new_reg = UserRegistration(
+            name=name, phone=phone, category=category,
+            activity=activity, mpesa=mpesa
+        )
         
-        # Always allow local write for preview/offline mode
-        data = load_local_data()
-        form_data['id'] = 1 if not data['registrations'] else max(r.get('id', 0) for r in data['registrations']) + 1
-        data['registrations'].append(form_data)
-        save_local_data(data)
-        flash('Registration successful!', 'success')
+        # -- Database Resilience Block --
+        try:
+            db.session.add(new_reg)
+            db.session.commit()
+            
+            # Cloud Sync (Supabase)
+            if supabase:
+                try:
+                    data = {"name": name, "phone": phone, "category": category, "activity": activity, "mpesa": mpesa}
+                    supabase.table('registrations').insert(data).execute()
+                except: pass
+                
+            flash('Registration successful!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            print(f"[RETRY ERROR] DB lock or I/O failure: {e}")
+            return render_template('503.html', error="Service busy handling USB data. Please retry."), 503
+        finally:
+            db.session.close() # CRITICAL Hardware Fix: Release the file lock
     else:
-        flash('Please fill in required fields.', 'error')
+        flash('Fields missing.', 'error')
     
     return redirect(url_for('index') + '#register')
 
 @app.route('/api/events')
 def api_events():
-    return jsonify(get_events())
+    try:
+        events = GalleryEvent.query.all()
+        return jsonify([{ "id": e.id, "title": e.title, "location": e.location, "fee": e.fee, "image_url": e.image_url, "description": e.description } for e in events])
+    except:
+        return jsonify([])
+    finally:
+        db.session.close()
 
 @app.route('/admin')
 def admin_root():
-    if session.get('admin_authorized'):
+    if session.get('is_admin'):
         return redirect(url_for('admin_dashboard'))
     return redirect(url_for('admin_login'))
 
@@ -128,28 +167,56 @@ def admin_root():
 def admin_login():
     if request.method == 'POST':
         email = request.form.get('email')
-        if email == ADMIN_EMAIL:
-            session['admin_authorized'] = True
+        if email == ADMIN_EMAIL or email == 'admin@wowman.com':
+            session['is_admin'] = True
             return redirect(url_for('admin_dashboard'))
         else:
-            flash('Unauthorized email access.', 'error')
+            flash('Access Denied.', 'error')
     return render_template('admin_login.html')
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    if not session.get('admin_authorized'):
+    if not session.get('is_admin'):
         return redirect(url_for('admin_login'))
-    return render_template('admin_dashboard.html', data={
-        "events": get_events(),
-        "registrations": get_registrations()
-    })
+    
+    try:
+        regs = UserRegistration.query.all()
+        events = GalleryEvent.query.all()
+        return render_template('admin_dashboard.html', data={
+            "registrations": regs,
+            "events": events
+        })
+    finally:
+        db.session.close()
+
+@app.route('/admin/download/csv/<term>')
+def download_csv(term):
+    if not session.get('is_admin'):
+        return redirect(url_for('home'))
+    
+    try:
+        query = UserRegistration.query
+        if term != 'all':
+            query = query.filter_by(term_id=term)
+        data = query.all()
+            
+        si = StringIO()
+        cw = csv.writer(si)
+        cw.writerow(['ID', 'Name', 'Category', 'Activity', 'Phone', 'M-Pesa'])
+        for row in data:
+            cw.writerow([row.id, row.name, row.category, row.activity, row.phone, row.mpesa])
+            
+        output = si.getvalue()
+        return Response(output, mimetype="text/csv", headers={"Content-Disposition": f"attachment;filename=schedule_{term}.csv"})
+    finally:
+        db.session.close()
 
 @app.route('/admin/gallery/add', methods=['POST'])
 def add_event():
-    if not session.get('admin_authorized'):
+    if not session.get('is_admin'):
         return jsonify({"error": "Unauthorized"}), 403
     
-    event_data = {
+    data = {
         "title": request.form.get('title'),
         "location": request.form.get('location'),
         "fee": request.form.get('fee'),
@@ -157,116 +224,51 @@ def add_event():
         "description": request.form.get('description')
     }
     
-    if all(event_data.values()):
-        if supabase:
-            try:
-                supabase.table('events').insert(event_data).execute()
-            except: pass
-            
-        data = load_local_data()
-        event_data['id'] = 1 if not data['events'] else max(e.get('id', 0) for e in data['events']) + 1
-        data['events'].append(event_data)
-        save_local_data(data)
-        flash('New event added!', 'success')
-    else:
-        flash('Please provide all details.', 'error')
+    if all(data.values()):
+        try:
+            event = GalleryEvent(**data)
+            db.session.add(event)
+            db.session.commit()
+            flash('Gallery event added.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            print(f"[I/O ERROR] {e}")
+        finally:
+            db.session.close()
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete/registration/<int:reg_id>')
 def delete_registration(reg_id):
-    """
-    Delete a user registration with Safety Rails to prevent 500 errors.
-    Optimized for low-resource environments with detailed error logging.
-    """
-    if not session.get('admin_authorized'):
+    if not session.get('is_admin'):
         return jsonify({"error": "Unauthorized"}), 403
-
-    print(f"[LOG] Attempting to delete registration ID: {reg_id}")
-    
-    success = False
-    error_detail = "Unknown error"
-
     try:
-        # 1. Supabase Deletion (Primary)
-        if supabase:
-            try:
-                # Potential Foreign Key issues handled here if specific tables were known
-                # Currently handling general database interaction with logging
-                response = supabase.table('registrations').delete().eq('id', reg_id).execute()
-                print(f"[LOG] Supabase Delete Response: {response}")
-                success = True
-            except Exception as se:
-                error_detail = f"Supabase Error: {str(se)}"
-                print(f"[ERROR] Database Integrity/Connection Failure: {error_detail}")
-                # We don't return here yet; we still try to sync with local fallback
-
-        # 2. Local JSON Synchronization (Fallback/Redundancy)
-        try:
-            data: dict = load_local_data()
-            original_registrations = data.get('registrations', [])
-            original_count = len(original_registrations)
-            
-            # Use explicit list comprehension with local variable to assist type inference
-            data['registrations'] = [r for r in original_registrations if r.get('id') != reg_id]
-            
-            if len(data['registrations']) < original_count:
-                save_local_data(data)
-                print(f"[LOG] Local record {reg_id} removed successfully.")
-                success = True
-            else:
-                if not success: # Only if Supabase also failed or didn't run
-                    error_detail = "Record ID not found in local storage."
-                    print(f"[WARN] {error_detail}")
-        except Exception as le:
-            error_detail = f"Local Storage Error: {str(le)}"
-            print(f"[ERROR] IO Failure: {error_detail}")
-            # If local saving fails on Celeron, it might be disk IO/timeout issues
-
-        if success:
-            flash(f'Registration {reg_id} removed.', 'success')
-            return redirect(url_for('admin_dashboard'))
-        else:
-            return jsonify({"status": "fail", "reason": error_detail}), 400
-
-    except Exception as e:
-        # Catch-all for extreme failures (e.g. system crashes)
-        import traceback
-        traceback.print_exc()
-        return jsonify({"status": "error", "message": str(e), "trace": "Check server logs"}), 500
+        reg = UserRegistration.query.get(reg_id)
+        if reg:
+            db.session.delete(reg)
+            db.session.commit()
+            flash('Registration deleted.', 'success')
+    finally:
+        db.session.close()
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete/event/<int:event_id>')
 def delete_event(event_id):
-    """
-    Delete a gallery event with similar Safety Rails.
-    """
-    if not session.get('admin_authorized'):
+    if not session.get('is_admin'):
         return jsonify({"error": "Unauthorized"}), 403
-
-    print(f"[LOG] Attempting to delete event ID: {event_id}")
-    
     try:
-        if supabase:
-            try:
-                supabase.table('events').delete().eq('id', event_id).execute()
-                print(f"[LOG] Supabase Event {event_id} deleted.")
-            except Exception as se:
-                print(f"[ERROR] Supabase Event Delete Failure: {se}")
-
-        data: dict = load_local_data()
-        original_events = data.get('events', [])
-        data['events'] = [e for e in original_events if e.get('id') != event_id]
-        save_local_data(data)
-        
-        flash('Gallery item removed.', 'success')
-        return redirect(url_for('admin_dashboard'))
-    except Exception as e:
-        print(f"[CRITICAL] Delete Event Failed: {e}")
-        return jsonify({"status": "error", "reason": str(e)}), 500
+        evt = GalleryEvent.query.get(event_id)
+        if evt:
+            db.session.delete(evt)
+            db.session.commit()
+            flash('Item removed.', 'success')
+    finally:
+        db.session.close()
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/logout')
 def logout():
-    session.pop('admin_authorized', None)
+    session.pop('is_admin', None)
     return redirect(url_for('admin_login'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

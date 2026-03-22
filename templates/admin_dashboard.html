@@ -6,27 +6,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - The Wow'Man Fare Haven Ltd.</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@300;400;600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@300;400;600&family=Roboto:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-light-body {
+            font-family: 'Inter', 'Roboto', sans-serif;
+            background-color: #f7f9fc;
+            color: #122139;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            background: #122139;
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .dashboard-table th,
+        .dashboard-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .badge {
+            background: #e0f2f1;
+            color: #00897b;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-teal {
+            background: #00897b;
+            color: white;
+        }
+
+        .btn-logout {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .btn-csv {
+            background: #fc5;
+            color: #122139;
+            margin: 5px;
+        }
+
+        .delete-link {
+            color: #d32f2f;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
 </head>
 
 <body class="admin-light-body">
     <div class="dashboard-header">
         <div class="header-content">
-            <h1>Wow'Man Haven Dashboard</h1>
-            <a href="/admin/logout" class="btn btn-logout">Secure Logout</a>
+            <h1 style="margin:0;">Wow'Man Haven Dashboard</h1>
+            <p style="margin:4px 0 0 0; font-size:0.9rem; opacity:0.8;">Secure Admin Control Panel (USB/Cloud Sync
+                Active)</p>
         </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-logout">Secure Logout</a>
     </div>
 
     <main class="dashboard-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert {{ category }}" style="margin-bottom: 2rem;">{{ message }}</div>
+        <div class="alert {{ category }}">{{ message }}</div>
         {% endfor %}
         {% endif %}
         {% endwith %}
+
+        <!-- Pupil Transport CSV Exports Section (Local Utility) -->
+        <section class="admin-card" style="margin-bottom: 2rem;">
+            <h3><i class="fas fa-file-csv"></i> Pupil Transport CSV Exports</h3>
+            <p style="font-size: 0.9rem; color: #666;">Download schedules for Intel Celeron/USB offline management.</p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('download_csv', term='Term 1') }}" class="btn btn-csv">Download Term 1</a>
+                <a href="{{ url_for('download_csv', term='Term 2') }}" class="btn btn-csv">Download Term 2</a>
+                <a href="{{ url_for('download_csv', term='Term 3') }}" class="btn btn-csv">Download Term 3</a>
+                <a href="{{ url_for('download_csv', term='all') }}" class="btn btn-csv"
+                    style="background-color: #fff; border: 1px solid #fc5;">Download Combined</a>
+            </div>
+        </section>
 
         <div class="dashboard-grid">
             <!-- Registrations Section -->
@@ -53,7 +170,7 @@
                                 <td>{{ reg.phone }}</td>
                                 <td><code>{{ reg.mpesa }}</code></td>
                                 <td>
-                                    <a href="/admin/delete/registration/{{ reg.id }}" class="delete-link"
+                                    <a href="{{ url_for('delete_registration', reg_id=reg.id) }}" class="delete-link"
                                         onclick="return confirm('Remove registration?')">Delete</a>
                                 </td>
                             </tr>
@@ -70,46 +187,51 @@
             <!-- Gallery Section -->
             <section class="admin-card gallery-section">
                 <h2>Gallery Manager</h2>
-                <form action="/admin/gallery/add" method="POST" class="light-form">
-                    <div class="form-group">
+                <form action="{{ url_for('add_event') }}" method="POST" class="light-form">
+                    <div class="form-group" style="margin-bottom: 1rem;">
                         <label>Item Title</label>
-                        <input type="text" name="title" required placeholder="E.g. Kenya Retreat 2026">
+                        <input type="text" name="title" required placeholder="E.g. Kenya Retreat"
+                            style="width:100%; padding: 8px; box-sizing:border-box;">
                     </div>
-                    <div style="display: flex; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
                         <div class="form-group" style="flex: 1;">
                             <label>Location</label>
-                            <input type="text" name="location" required placeholder="E.g. Mount Longonot">
+                            <input type="text" name="location" required
+                                style="width:100%; padding: 8px; box-sizing:border-box;">
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label>Fee</label>
-                            <input type="text" name="fee" required placeholder="E.g. 3,500 KES">
+                            <input type="text" name="fee" required
+                                style="width:100%; padding: 8px; box-sizing:border-box;">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 1rem;">
                         <label>Image URL</label>
-                        <input type="url" name="image_url" required placeholder="Enticing Photo URL">
+                        <input type="url" name="image_url" required
+                            style="width:100%; padding: 8px; box-sizing:border-box;">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 1rem;">
                         <label>Description</label>
-                        <textarea name="description" required rows="2" placeholder="Explain the event..."></textarea>
+                        <textarea name="description" required rows="2"
+                            style="width:100%; padding: 8px; box-sizing:border-box;"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-teal">Add Gallery Item</button>
+                    <button type="submit" class="btn btn-teal" style="width:100%;">Add Gallery Item</button>
                 </form>
 
                 <h3 style="margin-top: 2rem;">Current Events</h3>
-                <ul class="event-list-light">
+                <ul class="event-list-light" style="padding:0; list-style:none;">
                     {% for event in data.events %}
-                    <li>
+                    <li
+                        style="padding: 1rem 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: flex-start;">
                         <div class="list-item-content">
                             <strong>{{ event.title }}</strong>
-                            <div style="font-size: 0.8rem; color: var(--primary-teal); margin: 0.2rem 0;">
-                                <i class="fas fa-map-marker-alt"></i> {{ event.location }} |
-                                <i class="fas fa-tag"></i> {{ event.fee if event.fee else 'Fee: TBD' }}
+                            <div style="font-size: 0.8rem; color: #00897b; margin: 0.2rem 0;">
+                                <i class="fas fa-map-marker-alt"></i> {{ event.location }}
                             </div>
-                            <small>{{ event.description }}</small>
                         </div>
-                        <a href="/admin/delete/event/{{ event.id }}" class="delete-icon"
-                            onclick="return confirm('Remove gallery item?')"><i class="fas fa-trash"></i></a>
+                        <a href="{{ url_for('delete_event', event_id=event.id) }}" class="delete-icon"
+                            onclick="return confirm('Remove gallery item?')" style="color: #d32f2f;"><i
+                                class="fas fa-trash"></i></a>
                     </li>
                     {% endfor %}
                 </ul>

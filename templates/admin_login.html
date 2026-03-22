@@ -8,32 +8,94 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@300;400;600&display=swap"
         rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #122139;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            border-radius: 12px;
+            width: 350px;
+            text-align: center;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            color: #fc5;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        input {
+            padding: 12px;
+            margin: 10px 0;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #fc5;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #122139;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #f22;
+            color: #fff;
+        }
+
+        .error {
+            color: #f22;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 
 <body class="admin-light-body">
-    <div class="login-container">
-        <div class="admin-card">
-            <h2>Admin Security Portal</h2>
-            <p>Access authorized for developer mwanglewis6@gmail.com only.</p>
+    <div class="login-box">
+        <h2>Admin Security Portal</h2>
+        <p>Access authorized for developer & local management only.</p>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert {{ category }}">{{ message }}</div>
-            {% endfor %}
-            {% endif %}
-            {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="error">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-            <form method="POST" class="light-form">
-                <div class="form-group">
-                    <label>Developer Email Address</label>
-                    <input type="email" name="email" required placeholder="adminemail@gmail.com">
-                </div>
-                <button type="submit" class="btn btn-teal">Authorize Access</button>
-            </form>
-            <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #666;">
-                <a href="/" style="text-decoration: none; color: var(--primary-teal);">Back to Site</a>
-            </div>
+        <form method="POST" class="light-form">
+            <input type="email" name="email" required placeholder="Authorized Developer Email">
+            <button type="submit" class="btn btn-teal">Authorize Access</button>
+        </form>
+
+        <div style="margin-top: 2rem; font-size: 0.9rem;">
+            <a href="/" style="text-decoration: none; color: #fc5;">Back to Site</a>
         </div>
     </div>
 </body>

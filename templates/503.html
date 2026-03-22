@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Service Temporarily Busy - Wow'Man</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #122139;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            border-radius: 15px;
+            max-width: 500px;
+            border: 1px solid rgba(255, 165, 0, 0.5);
+        }
+
+        h1 {
+            color: #fc5;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #fc5;
+            color: #122139;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            background: #f22;
+            color: #fff;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h1>503: Service Temporarily Busy</h1>
+        <p>The server is currently experiencing heavy I/O load (Intel Celeron processing USB data).</p>
+        <p style="color: #ff9999;"><strong>Error Detail:</strong> {{ error }}</p>
+        <a href="javascript:location.reload()" class="btn">Click to Retry</a>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Event Booking - Enchanted Rose Gallery</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            background: #122139;
+            overflow: hidden;
+            margin: 0;
+            font-family: sans-serif;
+            color: white;
+        }
+
+        .container {
+            width: 100px;
+            height: 300px;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            transform: scale(0.6) translate(-200px, 0);
+        }
+
+        .container div {
+            position: absolute;
+        }
+
+        .container .glass {
+            height: 420px;
+            width: 250px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 300px 300px 0px 0px;
+            left: -80px;
+            top: -100px;
+            border-bottom: 15px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .container .glass:after {
+            width: 8px;
+            background: rgba(255, 255, 255, 0.28);
+            content: '';
+            position: absolute;
+            height: 80px;
+            border-radius: 100px;
+            left: 10px;
+            top: 180px;
+        }
+
+        .container .glass:before {
+            width: 8px;
+            background: rgba(255, 255, 255, 0.28);
+            content: '';
+            position: absolute;
+            height: 15px;
+            border-radius: 100px;
+            left: 10px;
+            top: 280px;
+        }
+
+        .container .glow {
+            width: 170px;
+            height: 170px;
+            border-radius: 100%;
+            border: 1px solid rgba(245, 148, 184, 0.47);
+            box-shadow: 0px 0px 10px #f594b8;
+            left: -40px;
+            top: -40px;
+            animation: glowing 2.5s ease-in-out infinite;
+        }
+
+        .container .rose-petals>div {
+            background: #d52d58;
+            width: 45px;
+            height: 80px;
+            position: absolute;
+            transition: all 0.5s ease-out;
+        }
+
+        .container .rose-petals>div:nth-child(1) {
+            border-radius: 15px;
+            left: 20px;
+            top: -6px;
+            background: #d52d58;
+        }
+
+        .container .rose-petals>div:nth-child(2),
+        .container .rose-petals>div:nth-child(4),
+        .container .rose-petals>div:nth-child(6) {
+            border-radius: 0px 30px 0px 30px;
+            background: #b81b43;
+            left: 0;
+            transform-origin: bottom right;
+        }
+
+        .container .rose-petals>div:nth-child(3),
+        .container .rose-petals>div:nth-child(5),
+        .container .rose-petals>div:nth-child(7) {
+            border-radius: 30px 0px 30px 0px;
+            left: 40px;
+            transform-origin: bottom left;
+        }
+
+        .container .rose-petals>div:nth-child(2) {
+            animation: openRose2 3s ease-in-out forwards;
+            z-index: 5;
+            background: #9e183a;
+            top: 10px;
+            height: 70px;
+            animation-delay: 2s;
+        }
+
+        .container .rose-petals>div:nth-child(3) {
+            animation: openRose3 3s ease-in-out forwards;
+            z-index: 4;
+            background: #9e183a;
+            top: 10px;
+            height: 70px;
+            animation-delay: 2s;
+        }
+
+        .container .rose-petals>div:nth-child(4) {
+            animation: openRose4 3s ease-in-out forwards;
+            z-index: 3;
+            background: #b81b43;
+            top: 5px;
+            height: 75px;
+            animation-delay: 2s;
+        }
+
+        .container .rose-petals>div:nth-child(5) {
+            animation: openRose5 3s ease-in-out forwards;
+            z-index: 2;
+            background: #b81b43;
+            top: 5px;
+            height: 75px;
+            animation-delay: 2s;
+        }
+
+        .container .rose-petals>div:nth-child(6) {
+            animation: openRose6 3s ease-in-out forwards;
+            z-index: 1;
+            background: #c9204b;
+            animation-delay: 2s;
+        }
+
+        .container .rose-petals>div:nth-child(7) {
+            animation: openRose7 3s ease-in-out forwards;
+            z-index: 0;
+            background: #c9204b;
+            animation-delay: 2s;
+        }
+
+        .container .rose-leaves>div:nth-last-child(1) {
+            width: 55px;
+            height: 30px;
+            background: #338f37;
+            position: absolute;
+            top: 60px;
+            left: 15px;
+            border-radius: 100px;
+        }
+
+        .container .rose-leaves>div:nth-child(1) {
+            width: 6px;
+            height: 230px;
+            border: none;
+            top: 80px;
+            background: #066406;
+            left: 40px;
+        }
+
+        .container .thorns>div {
+            width: 30px;
+            height: 30px;
+            background: #066406;
+            top: 100px;
+            left: 10px;
+        }
+
+        .container .thorns>div:after {
+            width: 41px;
+            height: 31px;
+            border-radius: 100%;
+            background: #122139;
+            content: "";
+            position: absolute;
+            left: -12px;
+            top: 17px;
+        }
+
+        .container .thorns>div:before {
+            width: 41px;
+            height: 31px;
+            border-radius: 100%;
+            background: #122139;
+            content: "";
+            position: absolute;
+            left: -11px;
+            top: -11px;
+            z-index: 0;
+        }
+
+        .container .thorns>div:nth-child(2) {
+            top: 150px;
+            transform: rotate(180deg);
+            left: 45px;
+        }
+
+        .container .thorns>div:nth-child(3) {
+            top: 180px;
+        }
+
+        .container .thorns>div:nth-child(4) {
+            top: 220px;
+            transform: rotate(180deg);
+            left: 45px;
+        }
+
+        .container .sparkles {
+            bottom: -40px;
+        }
+
+        .container .sparkles>div {
+            width: 4px;
+            height: 4px;
+            border-radius: 100px;
+            background: #ff96c0;
+            box-shadow: 0px 0px 12px 2px #ff4e85;
+            bottom: 0;
+            opacity: 0;
+            animation: sparkle 4s ease-in-out infinite;
+        }
+
+        .container .sparkles>div:nth-child(1) {
+            left: 60px;
+            animation-delay: 3s;
+        }
+
+        .container .sparkles>div:nth-child(2) {
+            left: 158px;
+            animation-delay: 2s;
+        }
+
+        .container .sparkles>div:nth-child(3) {
+            left: -22px;
+            animation-delay: 1s;
+        }
+
+        .container .sparkles>div:nth-child(4) {
+            left: 10px;
+            animation-delay: 1s;
+        }
+
+        .container .sparkles>div:nth-child(5) {
+            left: 177px;
+            animation-delay: 3s;
+        }
+
+        .container .sparkles>div:nth-child(6) {
+            left: -82px;
+            animation-delay: 2s;
+        }
+
+        .container .sparkles>div:nth-child(7) {
+            left: 45px;
+            animation-delay: 3s;
+        }
+
+        .container .sparkles>div:nth-child(8) {
+            left: 74px;
+            animation-delay: 3s;
+        }
+
+        .container .sparkles>div:nth-child(9) {
+            left: -79px;
+            animation-delay: 2s;
+        }
+
+        @keyframes sparkle {
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                bottom: 250px;
+            }
+        }
+
+        @keyframes openRose2 {
+            50% {
+                transform: rotate(-90deg);
+                top: 80px;
+                left: 100px;
+            }
+
+            100% {
+                transform: rotate(-60deg);
+                top: 210px;
+                left: -30px;
+            }
+        }
+
+        @keyframes openRose3 {
+            100% {
+                transform: rotate(60deg);
+            }
+        }
+
+        @keyframes openRose4 {
+            100% {
+                transform: rotate(-30deg);
+            }
+        }
+
+        @keyframes openRose5 {
+            100% {
+                transform: rotate(30deg);
+            }
+        }
+
+        @keyframes glowing {
+            50% {
+                box-shadow: 0px 0px 60px #f594b8;
+            }
+        }
+
+        .gallery-container {
+            position: absolute;
+            right: 10%;
+            top: 20%;
+            width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .gallery-container h2 {
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .gallery-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 1px dashed rgba(255, 255, 255, 0.4);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-back {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fc5;
+            text-decoration: none;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{{ url_for('client_step2') }}" class="nav-back">← Back</a>
+    <div class="container">
+        <div class="glass"></div>
+        <div class="thorns">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="glow"></div>
+        <div class="rose-leaves">
+            <div></div>
+            <div></div>
+        </div>
+        <div class="rose-petals">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="sparkles">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <h2>Event Booking Gallery</h2>
+        <div class="gallery-item">
+            [ Gallery Item Placeholder 1 ]
+        </div>
+        <div class="gallery-item">
+            [ Gallery Item Placeholder 2 ]
+        </div>
+        <div class="gallery-item">
+            [ Gallery Item Placeholder 3 ]
+        </div>
+    </div>
+</body>
+
+</html>

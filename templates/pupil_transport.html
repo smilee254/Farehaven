@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pupil Transport - Bus Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #333;
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main_container {
+            min-width: 100vw;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            z-index: -3;
+            position: relative;
+            margin-top: 50px;
+        }
+
+        .bus_container {
+            width: 1220px;
+            max-width: 1220px;
+            flex-shrink: 0;
+            height: 400px;
+            background: #fc5;
+            position: relative;
+            border-top-left-radius: 155px;
+            right: -50px;
+            transform: translateX(100%);
+        }
+
+        .bus_container.move {
+            animation: move 1.5s linear forwards;
+        }
+
+        @keyframes move {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0%);
+            }
+        }
+
+        .bus_container:before {
+            position: absolute;
+            content: '';
+            width: 90%;
+            height: 8px;
+            background: linear-gradient(to right, #000 22%, transparent 22%, transparent 38%, #000 35%, #000);
+            right: 0;
+            top: 50%;
+        }
+
+        .bus_container:after {
+            position: absolute;
+            content: '';
+            width: 90%;
+            height: 8px;
+            background: linear-gradient(to right, #000 22%, transparent 22%, transparent 38%, #000 35%, #000);
+            right: 0;
+            top: 55%;
+        }
+
+        .windows {
+            display: flex;
+            position: absolute;
+            flex-wrap: nowrap;
+            background: #fc5;
+            padding: 10px;
+            justify-content: flex-end;
+            z-index: 5;
+            width: 70%;
+            right: 0;
+        }
+
+        .windows .window {
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.7);
+            height: 110px;
+            width: 100px;
+            margin: 20px 10px;
+            box-shadow: 0 0 0 4px #555;
+            position: relative;
+        }
+
+        .window:after {
+            position: absolute;
+            content: '';
+            width: 100%;
+            height: 2px;
+            left: 0;
+            top: 50%;
+            background: #aaa;
+        }
+
+        .window:before {
+            position: absolute;
+            content: '';
+            height: 100%;
+            width: 8px;
+            left: 50%;
+            top: 0;
+            background: #555;
+        }
+
+        .tyre-con {
+            width: 250px;
+            height: 200px;
+            position: absolute;
+            bottom: -110px;
+        }
+
+        .tyre-con1 {
+            left: 100px;
+        }
+
+        .tyre-con2 {
+            right: 200px;
+        }
+
+        .tyres {
+            position: relative;
+            bottom: -50px;
+            background: #fc5;
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 25px #000, 0 0 0 15px #555 inset, 0 0 0 20px #005 inset;
+            z-index: 1;
+        }
+
+        .tyres.roll {
+            animation: roll 1.5s linear forwards;
+        }
+
+        .tyre1 {
+            left: 50px;
+        }
+
+        .tyre2 {
+            right: -50px;
+        }
+
+        @keyframes roll {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(-720deg);
+            }
+        }
+
+        .chassis {
+            position: absolute;
+            width: 170px;
+            height: 100px;
+            left: 5px;
+            top: -10px;
+            border-top-left-radius: 50%;
+            border-top-right-radius: 50%;
+            background: #077;
+        }
+
+        .tyres .bolts {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transform: rotate(calc(70deg * var(--t)));
+            top: 23%;
+            left: 25%;
+        }
+
+        .bolts:before {
+            position: absolute;
+            content: '';
+            height: 7px;
+            width: 7px;
+            top: 4px;
+            left: 4px;
+            border-radius: 50%;
+            background: #ccc;
+            z-index: 5;
+            box-shadow: 0 0 0 2px #366;
+        }
+
+        .exhaust {
+            position: absolute;
+            right: -20px;
+            bottom: 30px;
+            background: linear-gradient(to right, #555, #555, transparent);
+            width: 40px;
+            height: 15px;
+            border-top-left-radius: 50%;
+            border-bottom-left-radius: 50%;
+        }
+
+        .door {
+            position: absolute;
+            height: 93%;
+            width: 140px;
+            background: rgba(0, 0, 0, 0.8);
+            bottom: 0;
+            left: 380px;
+            z-index: 6;
+            border-radius: 3px;
+            box-shadow: inset 0 4px 0 7px #000, 0 0 0 10px #333 inset, 0 0 0 7px #000 inset
+        }
+
+        .door:after {
+            position: absolute;
+            content: '';
+            height: 96%;
+            width: 3.5px;
+            background: #aaa;
+            left: 50%;
+            z-index: -1;
+            top: 13px;
+        }
+
+        .door:before {
+            position: absolute;
+            content: '';
+            height: 96%;
+            width: 3.5px;
+            background: #aaa;
+            left: 54%;
+            z-index: -1;
+            top: 13px;
+        }
+
+        .stop-sign {
+            width: 70px;
+            line-height: 65px;
+            background: #f00;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 22px;
+            font-weight: 700;
+            box-shadow: 0 8px 10px #000;
+            position: absolute;
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            right: 30px;
+            top: 40%;
+            text-align: center;
+            z-index: 8;
+        }
+
+        .stop-sign:after {
+            position: absolute;
+            content: '';
+            width: 40px;
+            height: 50px;
+            background: #333;
+            left: -35px;
+            top: 0%;
+            z-index: 7;
+            box-shadow: 0 3px 10px #000
+        }
+
+        .front {
+            position: absolute;
+            width: 330px;
+            height: 50%;
+            top: 0;
+            left: -30px;
+            background: #333;
+            border-bottom-right-radius: 50%;
+            z-index: 10;
+            transform: rotate(-15deg)
+        }
+
+        .light {
+            position: absolute;
+            height: 50px;
+            width: 25px;
+            z-index: 10;
+        }
+
+        .b-light {
+            right: -25px;
+            top: 10px;
+            background: linear-gradient(to right, #f22, #f22, #fc5, #fc5);
+            border-top-right-radius: 100px;
+            border-bottom-right-radius: 100px;
+            box-shadow: 0 10px 15px #fc5, 0 -10px 10px #fc5, 0 0 25px 15px #fc5;
+        }
+
+        .f-light {
+            background: linear-gradient(to left, #f22, #fc5);
+            border-top-left-radius: 100px;
+            border-bottom-left-radius: 100px;
+            right: 0;
+            top: 45px;
+            box-shadow: 0 -10px 10px #fc5, 0 10px 10px #fc5, 0 0 25px 15px #fc5;
+        }
+
+        .head-light {
+            height: 45px;
+            width: 15px;
+            border-top-left-radius: 100px;
+            border-bottom-left-radius: 100px;
+            background: #fff;
+            bottom: 10px;
+            left: -20px;
+            position: absolute;
+            box-shadow: 0 10px 15px #fff, 0 -10px 25px #fff, 0 0 25px 10px #fff;
+        }
+
+        .head-light:nth-of-type(2) {
+            bottom: 70px;
+        }
+
+        .booking-section {
+            max-width: 800px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .booking-form {
+            display: none;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .booking-form.show {
+            display: block;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            min-width: 600px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #fc5;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #122139;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #f22;
+            color: #fff;
+        }
+
+        .nav-back {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fc5;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        @media screen and (max-width: 600px) {
+            .main_container {
+                transform: scale(0.4);
+                transform-origin: top center;
+                height: 160px;
+                margin-top: 60px;
+            }
+
+            .booking-section {
+                margin: 10px;
+                padding: 15px;
+            }
+        }
+    </style>
+    <script>
+        function toggleBookingForm() {
+            var status = document.getElementById("booking_status").checked;
+            var form = document.getElementById("booking_form_div");
+            var bus = document.querySelector(".bus_container");
+            var tyres = document.querySelectorAll(".tyres");
+
+            if (status) {
+                form.classList.add("show");
+                bus.classList.add("move");
+                tyres.forEach(t => t.classList.add("roll"));
+            } else {
+                form.classList.remove("show");
+                bus.classList.remove("move");
+                tyres.forEach(t => t.classList.remove("roll"));
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <a href="{{ url_for('client_step2') }}" class="nav-back">← Back</a>
+    <div class="main_container">
+        <div class="bus_container">
+            <div class="front">
+                <span class="steering"></span>
+                <span class="light f-light"></span>
+            </div>
+            <div class="windows">
+                <span class="window"></span>
+                <span class="window"></span>
+                <span class="window"></span>
+                <span class="window"></span>
+                <span class="window"></span>
+            </div>
+            <div class="door"></div>
+            <div class="tyre-con tyre-con1">
+                <div class="chassis"></div>
+                <div class="tyres tyre1">
+                    <span class="bolts" style="--t:1"></span>
+                    <span class="bolts" style="--t:2"></span>
+                    <span class="bolts" style="--t:3"></span>
+                    <span class="bolts" style="--t:4"></span>
+                    <span class="bolts" style="--t:5"></span>
+                </div>
+            </div>
+            <div class="tyre-con tyre-con2">
+                <div class="chassis"></div>
+                <div class="tyres tyre2">
+                    <span class="bolts" style="--t:1"></span>
+                    <span class="bolts" style="--t:2"></span>
+                    <span class="bolts" style="--t:3"></span>
+                    <span class="bolts" style="--t:4"></span>
+                    <span class="bolts" style="--t:5"></span>
+                </div>
+            </div>
+            <div class="exhaust"></div>
+            <div class="stop-sign"><span>stop</span></div>
+            <span class="head-light"></span>
+            <span class="head-light"></span>
+            <span class="light b-light"></span>
+        </div>
+    </div>
+
+    <div class="booking-section">
+        <h2>Pupil Transport Booking</h2>
+        <label style="font-size: 18px; display:flex; align-items:center; cursor:pointer; margin-top:20px;">
+            <input type="checkbox" id="booking_status" onchange="toggleBookingForm()"
+                style="width:20px; height:20px; margin-right: 10px;">
+            Enable Booking Status
+        </label>
+
+        <div id="booking_form_div" class="booking-form">
+            <form method="POST">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Student Name</th>
+                            <th>Residence</th>
+                            <th>Parent Phone</th>
+                            <th>After-Class Activities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="term" required>
+                                    <option value="">Select Term</option>
+                                    <option value="Term 1">Term 1 (Jan-Apr)</option>
+                                    <option value="Term 2">Term 2 (May-Aug)</option>
+                                    <option value="Term 3">Term 3 (Sep-Nov)</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="student_name" required></td>
+                            <td><input type="text" name="residence" required></td>
+                            <td><input type="tel" name="parent_phone" required></td>
+                            <td>
+                                <select name="activities">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="submit" class="submit-btn"
+                    onclick="javascript:document.querySelector('.booking-section').style.opacity = '0';">Submit
+                    Booking</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
