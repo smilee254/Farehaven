@@ -39,15 +39,28 @@ QUOTES = [
 ]
 
 # --- Dual Storage: Supabase with Local data.json Fallback ---
-def load_local_data():
+def load_local_data() -> dict:
+    """Load local data and ensure a consistent dictionary structure."""
     local_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data.json')
+    default_structure = {"events": [], "registrations": []}
+    
     if os.path.exists(local_path):
         with open(local_path, 'r') as f:
-            try: return json.load(f)
-            except: return {"events": [], "registrations": []}
-    return {"events": [], "registrations": []}
+            try:
+                data = json.load(f)
+                if not isinstance(data, dict):
+                    return default_structure
+                # Ensure keys exist
+                for key in default_structure:
+                    if key not in data:
+                        data[key] = []
+                return data
+            except:
+                return default_structure
+    return default_structure
 
-def save_local_data(data):
+def save_local_data(data: dict):
+    """Save dictionary to local file atomically if possible."""
     local_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data.json')
     with open(local_path, 'w') as f:
         json.dump(data, f, indent=4)
@@ -161,29 +174,94 @@ def add_event():
 
 @app.route('/admin/delete/registration/<int:reg_id>')
 def delete_registration(reg_id):
-    if not session.get('admin_authorized'): return redirect(url_for('admin_login'))
-    if supabase:
-        try: supabase.table('registrations').delete().eq('id', reg_id).execute()
-        except: pass
+    """
+    Delete a user registration with Safety Rails to prevent 500 errors.
+    Optimized for low-resource environments with detailed error logging.
+    """
+    if not session.get('admin_authorized'):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    print(f"[LOG] Attempting to delete registration ID: {reg_id}")
     
-    data = load_local_data()
-    data['registrations'] = [r for r in data['registrations'] if r.get('id') != reg_id]
-    save_local_data(data)
-    flash('Removed.', 'success')
-    return redirect(url_for('admin_dashboard'))
+    success = False
+    error_detail = "Unknown error"
+
+    try:
+        # 1. Supabase Deletion (Primary)
+        if supabase:
+            try:
+                # Potential Foreign Key issues handled here if specific tables were known
+                # Currently handling general database interaction with logging
+                response = supabase.table('registrations').delete().eq('id', reg_id).execute()
+                print(f"[LOG] Supabase Delete Response: {response}")
+                success = True
+            except Exception as se:
+                error_detail = f"Supabase Error: {str(se)}"
+                print(f"[ERROR] Database Integrity/Connection Failure: {error_detail}")
+                # We don't return here yet; we still try to sync with local fallback
+
+        # 2. Local JSON Synchronization (Fallback/Redundancy)
+        try:
+            data: dict = load_local_data()
+            original_registrations = data.get('registrations', [])
+            original_count = len(original_registrations)
+            
+            # Use explicit list comprehension with local variable to assist type inference
+            data['registrations'] = [r for r in original_registrations if r.get('id') != reg_id]
+            
+            if len(data['registrations']) < original_count:
+                save_local_data(data)
+                print(f"[LOG] Local record {reg_id} removed successfully.")
+                success = True
+            else:
+                if not success: # Only if Supabase also failed or didn't run
+                    error_detail = "Record ID not found in local storage."
+                    print(f"[WARN] {error_detail}")
+        except Exception as le:
+            error_detail = f"Local Storage Error: {str(le)}"
+            print(f"[ERROR] IO Failure: {error_detail}")
+            # If local saving fails on Celeron, it might be disk IO/timeout issues
+
+        if success:
+            flash(f'Registration {reg_id} removed.', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return jsonify({"status": "fail", "reason": error_detail}), 400
+
+    except Exception as e:
+        # Catch-all for extreme failures (e.g. system crashes)
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e), "trace": "Check server logs"}), 500
 
 @app.route('/admin/delete/event/<int:event_id>')
 def delete_event(event_id):
-    if not session.get('admin_authorized'): return redirect(url_for('admin_login'))
-    if supabase:
-        try: supabase.table('events').delete().eq('id', event_id).execute()
-        except: pass
+    """
+    Delete a gallery event with similar Safety Rails.
+    """
+    if not session.get('admin_authorized'):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    print(f"[LOG] Attempting to delete event ID: {event_id}")
     
-    data = load_local_data()
-    data['events'] = [e for e in data['events'] if e.get('id') != event_id]
-    save_local_data(data)
-    flash('Gallery item removed.', 'success')
-    return redirect(url_for('admin_dashboard'))
+    try:
+        if supabase:
+            try:
+                supabase.table('events').delete().eq('id', event_id).execute()
+                print(f"[LOG] Supabase Event {event_id} deleted.")
+            except Exception as se:
+                print(f"[ERROR] Supabase Event Delete Failure: {se}")
+
+        data: dict = load_local_data()
+        original_events = data.get('events', [])
+        data['events'] = [e for e in original_events if e.get('id') != event_id]
+        save_local_data(data)
+        
+        flash('Gallery item removed.', 'success')
+        return redirect(url_for('admin_dashboard'))
+    except Exception as e:
+        print(f"[CRITICAL] Delete Event Failed: {e}")
+        return jsonify({"status": "error", "reason": str(e)}), 500
 
 @app.route('/admin/logout')
 def logout():

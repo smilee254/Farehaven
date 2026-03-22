@@ -25,14 +25,5 @@
             "description": "A peaceful gathering for spiritual nourishment and shared gratitude in our lush, private Kenyan gardens."
         }
     ],
-    "registrations": [
-        {
-            "name": "Scolstica Nyambura",
-            "phone": "0713352735",
-            "category": "Individual",
-            "activity": "Prayer Session",
-            "mpesa": "0194ijrqjrkwk",
-            "id": 1
-        }
-    ]
+    "registrations": []
 }
