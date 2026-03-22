@@ -25,5 +25,14 @@
             "description": "A peaceful gathering for spiritual nourishment and shared gratitude in our lush, private Kenyan gardens."
         }
     ],
-    "registrations": []
+    "registrations": [
+        {
+            "name": "Lewis mwangi",
+            "phone": "0759399204",
+            "category": "Individual",
+            "activity": "Hiking",
+            "mpesa": "uuwuuwuwdb",
+            "id": 1
+        }
+    ]
 }
