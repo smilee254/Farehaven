@@ -1,5 +1,6 @@
-# Senior Review: Clean Structure Optimization (frontend/backend)
-import os, sys, json, csv, time, random
+# Senior Review: Clean Structure & Vercel Compatibility
+import os, sys, json, csv, time, random, logging
+logging.basicConfig(level=logging.DEBUG)
 from io import StringIO
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, Response
 
@@ -20,11 +21,20 @@ app = Flask(__name__,
             static_folder='../frontend/static')
 app.secret_key = os.environ.get('SECRET_KEY', 'wowman_executive_muse_secret_key')
 
-# 4. Hardware Optimized Database (Local to backend/)
-DB_PATH = os.path.join(os.path.dirname(__file__), 'registration.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}?timeout=30'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# 4. Environment-Aware Database (Vercel Survival Mode)
+# Vercel is Read-Only. We switch to /tmp/ or a real DB URL if available.
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+if os.environ.get('VERCEL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:////tmp/registration.db'
+else:
+    # Local USB Drive Path
+    DB_PATH = os.path.join(os.path.dirname(__file__), 'registration.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}?timeout=30'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # 4. Global Config
