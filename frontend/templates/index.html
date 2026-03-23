@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wow'Man Fare Haven Ltd</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Interactive Rose Background Element -->
+    <div class="rose-bg" id="roseBg"></div>
+
+    <nav>
+        <div class="logo">The Wow'Man Fare Haven</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showSection('home')">Home</a></li>
+            <li><a href="#" onclick="showSection('event')">Event Booking</a></li>
+            <li><a href="#" onclick="showSection('transport')">Pupil Transport</a></li>
+            <li><a href="#" onclick="showSection('admin')">Admin</a></li>
+        </ul>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/254700000000?text=Hello%20Wow'Man%20Fare%20Haven,%20I'm%20interested%20in%20your%20services."
+        class="whatsapp-float" id="waBtn" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <div class="glass-card quote-card">
+                    <h1>Welcome to Fare Haven</h1>
+                    <div class="quote-container">
+                        <i class="fas fa-quote-left quote-icon"></i>
+                        <p id="weeklyQuote">Loading empowerment quote...</p>
+                        <i class="fas fa-quote-right quote-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-path">
+                <div class="path-card" onclick="showSection('event')">
+                    <i class="fas fa-calendar-star path-icon"></i>
+                    <h2>Event Booking</h2>
+                    <p>Premium transport for your group events.</p>
+                </div>
+                <div class="path-card" onclick="showSection('transport')">
+                    <i class="fas fa-bus-school path-icon"></i>
+                    <h2>Pupil Transport</h2>
+                    <p>Safe, reliable daily transport for students.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Event Booking Section -->
+        <section id="event" class="section hidden">
+            <div class="glass-card form-card">
+                <h2>Book an Event</h2>
+                <form id="eventForm" onsubmit="submitForm(event, 'event')">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Date</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Details</label>
+                        <textarea name="details" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group toggle-group">
+                        <label>Is this for a Chama / Group?</label>
+                        <label class="switch">
+                            <input type="checkbox" name="is_chama" id="chamaToggle" onchange="toggleChamaDetails()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div id="chamaDetails" class="hidden-field">
+                        <div class="form-group">
+                            <label>Group Size</label>
+                            <input type="number" name="group_size" min="1">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Book Event</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Pupil Transport Section -->
+        <section id="transport" class="section hidden">
+            <div class="glass-card form-card">
+                <h2>Pupil Transport Sign-Up</h2>
+
+                <div class="bus-animation">
+                    <i class="fas fa-bus side-bus" id="busIcon"></i>
+                    <div class="road"></div>
+                </div>
+
+                <div class="bus-status">
+                    <p>Bus Pulse Status: <span id="busPulseStatus" class="status-badge loading">Checking...</span></p>
+                </div>
+
+                <div class="term-progress-container">
+                    <p>Kenyan School Term Progress: <span id="termName">Loading...</span></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="termProgressFill" style="width: 0%"></div>
+                    </div>
+                    <p class="progress-text" id="termProgressText">--% Complete</p>
+                </div>
+
+                <form id="transportForm" onsubmit="submitForm(event, 'transport')">
+                    <div class="form-group">
+                        <label>Parent/Guardian Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>School Name</label>
+                        <input type="text" name="school" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pupil Grade/Class</label>
+                        <input type="text" name="grade" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Register for Transport</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section id="admin" class="section hidden">
+            <div class="glass-card admin-card">
+                <h2>Admin Panel</h2>
+
+                <div class="admin-controls">
+                    <div class="control-group">
+                        <h3>Bus Pulse Status</h3>
+                        <p>Toggle the operational status of the bus fleet.</p>
+                        <label class="switch">
+                            <input type="checkbox" id="adminPulseToggle" onchange="togglePulseStatus()">
+                            <span class="slider round"></span>
+                        </label>
+                        <span id="adminPulseLabel">Active</span>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Data Export</h3>
+                        <p>Download a master CSV of all bookings and registrations.</p>
+                        <button class="btn-secondary" onclick="exportData()">
+                            <i class="fas fa-file-csv"></i> Export Master CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
