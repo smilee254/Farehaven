@@ -1,0 +1,46 @@
+{
+    "events": [
+        {
+            "id": 1,
+            "title": "Kenyan Highland Hiking",
+            "location": "Aberdare Ranges",
+            "fee": "",
+            "image_url": "/static/hiking.png",
+            "description": "Reconnect with nature in the breathtaking Kenyan highlights. Experience community and rejuvination with your fellow Gen-x and Mellenial friends."
+        },
+        {
+            "id": 2,
+            "title": "Hell's Gate Rock Climbing",
+            "location": "Naivasha, Hell's Gate",
+            "fee": "",
+            "image_url": "/static/rock_climbing.png",
+            "description": "Push your limits with professional rock climbing for women at Hell's Gate. Find your inner strength and bond with a powerful community."
+        },
+        {
+            "id": 3,
+            "title": "Serene Garden Prayer Session",
+            "location": "Karen Gardens, Nairobi",
+            "fee": "",
+            "image_url": "/static/prayer.png",
+            "description": "A peaceful gathering for spiritual nourishment and shared gratitude in our lush, private Kenyan gardens."
+        }
+    ],
+    "registrations": [
+        {
+            "name": "Lewis mwangi",
+            "phone": "0759399204",
+            "category": "Individual",
+            "activity": "Hiking",
+            "mpesa": "uuwuuwuwdb",
+            "id": 1
+        },
+        {
+            "name": "Lewis mwangi",
+            "phone": "0759399204",
+            "category": "Individual",
+            "activity": "Rock Climbing",
+            "mpesa": "uuwuuwuwdb",
+            "id": 2
+        }
+    ]
+}
